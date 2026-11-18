@@ -1,26 +1,397 @@
 @import "tailwindcss";
 
+/* ── Design tokens ─────────────────────────────────────────────────────────── */
+@theme {
+  --color-ink: #0b0a0c;
+  --color-sumi: #16141a;
+  --color-charcoal: #24212a;
+  --color-line: #2f2b36;
+  --color-sakura: #f2a7c3;
+  --color-sakura-deep: #d9779c;
+  --color-shiro: #f3eee8;
+  --color-beni: #b8433f;
+  --color-mist: #9a95a1;
+
+  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  --font-jp: var(--font-shippori), "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --ease-ink: cubic-bezier(0.7, 0, 0.2, 1);
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --breakpoint-xs: 22.5rem;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .93 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--color-ink);
+  -webkit-text-size-adjust: 100%;
+  scrollbar-color: var(--color-charcoal) var(--color-ink);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ink);
+  color: var(--color-shiro);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  overflow-x: clip;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-sakura) 35%, transparent);
+  color: var(--color-shiro);
+}
+
+:focus-visible {
+  outline: 1.5px solid var(--color-sakura);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* Washi paper grain: static, pointer-transparent, composited once. */
+.washi::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background-image: var(--grain);
+  opacity: 0.05;
+}
+
+.vertical {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: var(--font-jp);
+  letter-spacing: 0.3em;
+}
+
+/* ── Lenis ────────────────────────────────────────────────────────────────── */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+/* ── Custom cursor ────────────────────────────────────────────────────────── */
+html.has-cursor,
+html.has-cursor a,
+html.has-cursor button,
+html.has-cursor [role="button"] {
+  cursor: none;
+}
+html.has-cursor input,
+html.has-cursor textarea {
+  cursor: text;
+}
+
+/* ── Progressive enhancement (html.js is set before paint) ────────────────── */
+.loader {
+  display: none;
+}
+html.js .loader {
+  display: flex;
+}
+
+html.js .site-header:not([data-show="true"]) {
+  transform: translateY(-110%);
+}
+
+/* Staged reveals: hidden only when JS runs, shown once the parent is revealed. */
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 1s var(--ease-out-soft),
+    transform 1.2s var(--ease-out-soft);
+}
+html.js [data-revealed] [data-reveal] {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Ink link ─────────────────────────────────────────────────────────────── */
+.ink-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  isolation: isolate;
+}
+.ink-link .ink-underline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.2em;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.6s var(--ease-ink);
+}
+.ink-link:hover .ink-underline,
+.ink-link:focus-visible .ink-underline {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+.ink-link .ink-drop {
+  position: absolute;
+  z-index: -1;
+  width: 2.4em;
+  height: 2.4em;
+  margin: -1.2em 0 0 -1.2em;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in oklab, var(--color-sakura) 38%, transparent) 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* ── Blossom grid (activity) ──────────────────────────────────────────────── */
+.bloom-cell {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0.2) rotate(-40deg);
+  opacity: 0;
+}
+.in-view .bloom-cell {
+  animation: bloom 0.9s var(--ease-out-soft) forwards;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+@keyframes bloom {
+  to {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Branch blossoms */
+.branch-bloom {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0) rotate(-60deg);
+  transition: transform 0.8s var(--ease-out-soft);
+}
+.branch-bloom.open {
+  transform: scale(1) rotate(0deg);
+}
+
+/* Footer falling petals */
+.footer-petal {
+  animation: footer-fall var(--dur, 9s) linear infinite;
+  animation-delay: var(--delay, 0s);
+  animation-play-state: paused;
+  opacity: 0;
+}
+.in-view .footer-petal {
+  animation-play-state: running;
+}
+@keyframes footer-fall {
+  0% {
+    transform: translate3d(0, -10%, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  85% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate3d(var(--drift, 60px), 420px, 0) rotate(var(--spin, 300deg));
+    opacity: 0;
+  }
+}
+
+@keyframes scroll-drop {
+  0% {
+    transform: translateY(-100%);
+  }
+  60%,
+  100% {
+    transform: translateY(260%);
+  }
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ── View transitions (route changes) ─────────────────────────────────────── */
+::view-transition-old(page) {
+  animation: vt-out 0.45s var(--ease-ink) both;
+}
+::view-transition-new(page) {
+  animation: vt-in 0.6s var(--ease-out-soft) 0.1s both;
+}
+@keyframes vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+}
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+/* ── README (GitHub-rendered markdown inside the project modal) ────────────── */
+.readme {
+  color: color-mix(in oklab, var(--color-shiro) 82%, transparent);
+  font-size: 15px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+.readme > :first-child,
+.readme article > :first-child {
+  margin-top: 0;
+}
+.readme :is(p, ul, ol, pre, table, blockquote, details, .markdown-heading, .highlight, .snippet-clipboard-content, section) {
+  margin-block: 0 1.1em;
+}
+.readme .markdown-heading {
+  margin-top: 2em;
+}
+.readme :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-shiro);
+}
+.readme h1 { font-size: 2.1rem; }
+.readme h2 {
+  font-size: 1.7rem;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid var(--color-line);
+}
+.readme h3 { font-size: 1.35rem; }
+.readme :is(h4, h5, h6) {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.readme .anchor { display: none; }
+.readme a {
+  color: var(--color-sakura);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--color-sakura) 35%, transparent);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.3s;
+}
+.readme a:hover { text-decoration-color: currentColor; }
+.readme strong { color: var(--color-shiro); font-weight: 600; }
+.readme ul { list-style: disc; padding-left: 1.4em; }
+.readme ol { list-style: decimal; padding-left: 1.4em; }
+.readme li + li { margin-top: 0.3em; }
+.readme li > :is(ul, ol) { margin: 0.3em 0 0; }
+.readme li::marker { color: var(--color-sakura-deep); }
+.readme .contains-task-list { list-style: none; padding-left: 0.2em; }
+.readme .task-list-item-checkbox { margin-right: 0.5em; accent-color: var(--color-sakura); vertical-align: -1px; }
+.readme img { display: inline-block; max-width: 100%; height: auto; }
+.readme p[align="center"] { text-align: center; }
+.readme p > a:has(> img) { text-decoration: none; }
+.readme hr { border: 0; border-top: 1px solid var(--color-line); margin: 2em 0; }
+.readme blockquote {
+  border-left: 2px solid var(--color-sakura-deep);
+  padding: 0.2em 0 0.2em 1em;
+  color: var(--color-mist);
+}
+.readme :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  background: var(--color-charcoal);
+  color: var(--color-shiro);
+}
+.readme pre {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  padding: 1em 1.2em;
+  overflow-x: auto;
+  border: 1px solid var(--color-line);
+  border-radius: 3px;
+  background: var(--color-ink);
+  color: var(--color-shiro);
+  overflow-wrap: normal;
+  white-space: pre;
+}
+.readme :is(.highlight, .snippet-clipboard-content) > pre { margin: 0; }
+/* GitHub syntax-highlight classes, tinted to the palette */
+.readme :is(.pl-c) { color: var(--color-mist); font-style: italic; }
+.readme :is(.pl-k, .pl-kos) { color: var(--color-sakura); }
+.readme :is(.pl-s, .pl-pds, .pl-sr) { color: #b9d8a8; }
+.readme :is(.pl-c1, .pl-cce, .pl-v) { color: #9ec5f0; }
+.readme :is(.pl-en, .pl-e) { color: #e8c48f; }
+.readme :is(.pl-smi, .pl-s1) { color: var(--color-shiro); }
+.readme :is(.pl-ent, .pl-pse) { color: var(--color-sakura-deep); }
+.readme table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  overflow-wrap: normal;
+}
+.readme :is(th, td) { border: 1px solid var(--color-line); padding: 0.5em 0.9em; text-align: left; }
+.readme th { color: var(--color-shiro); font-weight: 600; background: var(--color-charcoal); }
+.readme tr:nth-child(2n) td { background: color-mix(in oklab, var(--color-charcoal) 35%, transparent); }
+.readme details {
+  border: 1px solid var(--color-line);
+  border-radius: 3px;
+  padding: 0.7em 1em;
+}
+.readme details[open] > summary { margin-bottom: 0.8em; }
+.readme summary { cursor: pointer; color: var(--color-shiro); }
+html.has-cursor .readme summary { cursor: none; }
+/* Mermaid and other "enriched" blocks: show the source, not GitHub's spinner. */
+.readme .render-plaintext-hidden { display: block; }
+.readme .js-render-enrichment-loader { display: none !important; }
+.readme .sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* ── Reduced motion: calm, static, complete ───────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html.js .loader {
+    display: none;
+  }
+  .bloom-cell,
+  .in-view .bloom-cell,
+  .branch-bloom {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+  .footer-petal {
+    display: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-old(page),
+  ::view-transition-new(page) {
+    animation: none;
+  }
 }
