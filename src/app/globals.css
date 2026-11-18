@@ -98,29 +98,33 @@ html.has-cursor textarea {
   cursor: text;
 }
 
-/* ── Progressive enhancement (html.js is set before paint) ────────────────── */
+/* ── Progressive enhancement ──────────────────────────────────────────────────
+   Animated start states apply only when scripting is enabled, so the page is
+   complete without JS. (A media query, not an inline script, keeps the CSP strict.) */
 .loader {
   display: none;
 }
-html.js .loader {
-  display: flex;
-}
+@media (scripting: enabled) {
+  .loader {
+    display: flex;
+  }
 
-html.js .site-header:not([data-show="true"]) {
-  transform: translateY(-110%);
-}
+  .site-header:not([data-show="true"]) {
+    transform: translateY(-110%);
+  }
 
-/* Staged reveals: hidden only when JS runs, shown once the parent is revealed. */
-html.js [data-reveal] {
-  opacity: 0;
-  transform: translateY(18px);
-  transition:
-    opacity 1s var(--ease-out-soft),
-    transform 1.2s var(--ease-out-soft);
-}
-html.js [data-revealed] [data-reveal] {
-  opacity: 1;
-  transform: none;
+  /* Staged reveals: hidden only when JS runs, shown once the parent is revealed. */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 1s var(--ease-out-soft),
+      transform 1.2s var(--ease-out-soft);
+  }
+  [data-revealed] [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ── Ink link ─────────────────────────────────────────────────────────────── */
@@ -369,8 +373,8 @@ html.has-cursor .readme summary { cursor: none; }
 
 /* ── Reduced motion: calm, static, complete ───────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  html.js .loader {
-    display: none;
+  .loader {
+    display: none !important;
   }
   .bloom-cell,
   .in-view .bloom-cell,

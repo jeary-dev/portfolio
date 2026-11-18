@@ -6,9 +6,13 @@ import { Activity } from "@/components/sections/Activity";
 import { Contact } from "@/components/sections/Contact";
 import { Footer } from "@/components/sections/Footer";
 import { BranchGrowth } from "@/components/decor/BranchGrowth";
+import { connection } from "next/server";
 import { site } from "@/config/site";
 
-export default function Home() {
+export default async function Home() {
+  // Render per request so GitHub data is never fetched during `next build`.
+  await connection();
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",

@@ -18,12 +18,11 @@ export const site = {
   /** Handle / logo mark. */
   handle: "jeary-dev",
 
-  /** Production URL. Set NEXT_PUBLIC_SITE_URL on Vercel to override. */
-  url:
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    (process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : "http://localhost:3000"),
+  /**
+   * Canonical URL (Open Graph, sitemap, robots, JSON-LD). Override with
+   * NEXT_PUBLIC_SITE_URL; it is inlined at build time, so pass it as a build arg.
+   */
+  url: (process.env.NEXT_PUBLIC_SITE_URL || "https://jeary.dev").replace(/\/+$/, ""),
 
   /** SEO */
   title: "czrbyn: Minecraft plugins, Discord bots, web & apps",

@@ -63,15 +63,56 @@ export const projectConfig: ProjectConfig = {
   hideArchived: false,
   inferCategories: true,
 
+  /*
+   * Featured: Hanami, Ichiba, Kaizen (pinned, in that order).
+   *
+   * SCREENSHOT SLOTS: drop a 16:9 image (1600×900 works well) into
+   * public/projects/ and uncomment the matching `screenshot` line. Leave them
+   * commented until the file exists, or the card shows a broken image.
+   */
   overrides: [
-    // Examples. Uncomment and edit:
-    // { repo: "MCBridge", pinned: true, category: "minecraft", description: "…" },
-    // { repo: "mcping", screenshot: { src: "/projects/mcping.png", alt: "mcping output" } },
-    // { repo: "some-old-repo", hidden: true },
+    {
+      repo: "Hanami",
+      pinned: true,
+      order: 1,
+      category: "minecraft",
+      // ▼ SCREENSHOT SLOT: Hanami
+      // screenshot: { src: "/projects/hanami.png", alt: "Hanami particle cosmetics in game" },
+    },
+    {
+      repo: "Kaizen",
+      title: "Kaizen",
+      pinned: true,
+      order: 3,
+      category: "minecraft",
+      description:
+        "Edit your Minecraft server's config files in a real web editor, then apply them with one command. End-to-end encrypted, with live checks, a diff before saving, and one-command undo.",
+      homepage: "https://edit.jeary.dev/demo",
+      // ▼ SCREENSHOT SLOT: Kaizen
+      // screenshot: { src: "/projects/kaizen.png", alt: "The Kaizen web editor showing a server config" },
+    },
+    // Retired: not featured.
+    { repo: "MCBridge", hidden: true },
   ],
 
+  /*
+   * Work that isn't a public GitHub repo. An entry whose description is still a
+   * [placeholder] is hidden in production, like every other placeholder.
+   */
   extras: [
-    // { title: "Private plugin", description: "…", category: "minecraft", language: "Kotlin" },
+    {
+      title: "Ichiba",
+      pinned: true,
+      order: 2,
+      // TODO: set the real category ("minecraft" | "discord" | "web" | "apps" | "other").
+      category: "other",
+      description: "[one or two sentences about Ichiba]",
+      // url: "https://github.com/jeary-dev/Ichiba",   // the code, once public
+      // homepage: "https://…",                         // a live link, if any
+      // language: "Kotlin",
+      // ▼ SCREENSHOT SLOT: Ichiba
+      // screenshot: { src: "/projects/ichiba.png", alt: "Ichiba" },
+    },
   ],
 };
 

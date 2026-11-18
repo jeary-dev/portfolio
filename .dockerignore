@@ -1,0 +1,9 @@
+.git
+.next
+node_modules
+npm-debug.log*
+.env*
+deploy/portfolio.env
+docs
+*.md
+!README.md

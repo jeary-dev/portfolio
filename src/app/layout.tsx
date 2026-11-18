@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Inter_Tight, JetBrains_Mono, Shippori_Mincho } from "next/font/google";
+import { connection } from "next/server";
 import { ViewTransition } from "react";
 import { site } from "@/config/site";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
@@ -75,19 +76,23 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+/**
+ * Every page renders per request: the strict CSP in src/proxy.ts needs a fresh
+ * nonce on Next's scripts, and GitHub data is fetched at runtime (cached
+ * server-side) instead of being frozen into the build. `instant = false`
+ * allows the route to wait for the request instead of serving a static shell.
+ */
+export const instant = false;
+
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  await connection();
+
   return (
     <html
       lang="en"
       suppressHydrationWarning
       className={`${display.variable} ${sans.variable} ${jp.variable} ${mono.variable} antialiased`}
     >
-      <head>
-        {/* Marks JS as available before first paint, so animated states never hide content without JS. */}
-        <script
-          dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }}
-        />
-      </head>
       <body className="washi min-h-dvh">
         <a
           href="#main"

@@ -85,26 +85,27 @@ extras: [
   still visible. Empty results show an empty state, never a broken grid.
 - **Contributions** use the GraphQL API when `GITHUB_TOKEN` is set. Otherwise they fall back to
   GitHub's public contribution calendar. If both fail, a "branch is resting" state appears.
-- The page is prerendered as static HTML and refreshed in the background (ISR), so visitors never
-  wait on GitHub.
+- **Nothing is fetched at build time.** Pages render per request (needed for the CSP nonce), and
+  GitHub data is cached on the server: refreshed hourly in the background, retried after five
+  minutes on failure, and the last good result keeps showing if a refresh fails.
 
-### Environment variables (all optional)
+### Environment variables
 
-Copy `.env.example` to `.env.local`:
+For local development, copy `deploy/portfolio.env.example` to `.env.local`. All are optional:
 
 | Variable | Why |
 | --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | Canonical URL for links, Open Graph, the sitemap and robots. Defaults to `https://jeary.dev`. Inlined at build time. |
 | `GITHUB_TOKEN` | A fine-grained token with **no scopes**. It raises the API limit from 60 to 5,000 requests per hour and enables the GraphQL contributions source. |
-| `NEXT_PUBLIC_SITE_URL` | Your final domain, used for canonical URLs, Open Graph, the sitemap and robots. On Vercel it falls back to the production URL automatically. |
+| `CONTACT_EMAIL` | Where contact messages go. With only this set, the form opens the visitor's email app (`mailto:`). |
+| `RESEND_API_KEY` | With this and `CONTACT_EMAIL`, the form sends from the server via Resend, falling back to `mailto:` if sending fails. |
+| `RESEND_FROM` | Sender address on a domain verified in Resend, e.g. `jeary.dev <contact@jeary.dev>`. |
 
-## Deploy to Vercel
+With no contact variables set, the form composes a message to paste into a Discord DM.
 
-1. Push this folder to a GitHub repo.
-2. Import it at [vercel.com/new](https://vercel.com/new). The framework is detected and no settings
-   need changing.
-3. *(Optional)* Add `GITHUB_TOKEN` and `NEXT_PUBLIC_SITE_URL` under **Settings → Environment
-   Variables**.
-4. Deploy.
+## Deploy
+
+Self-hosted with Docker Compose behind a Cloudflare Tunnel. See [docs/deploy.md](docs/deploy.md).
 
 Generated for you: the Open Graph image (`/opengraph-image`), the favicon (`icon.svg`), the Apple
 touch icon, `sitemap.xml`, `robots.txt` and a web manifest.
@@ -115,7 +116,10 @@ touch icon, `sitemap.xml`, `robots.txt` and a web manifest.
 src/
   app/                 layout (fonts, metadata), page, OG image, icons, sitemap, robots, 404
   config/              ← your content: site.ts, projects.ts
-  lib/                 github.ts (server data), hooks.ts, utils.ts, og.tsx
+  app/api/             readme/[repo] (README for the Explore modal), health
+  app/actions/         contact.ts (contact form server action)
+  proxy.ts             per-request CSP nonce
+  lib/                 github.ts (server data), contact.ts, hooks.ts, utils.ts, og.tsx
   components/
     providers/         Lenis smooth scroll (shares GSAP's ticker), Motion config
     chrome/            Loader, Header (+ mobile menu), Cursor (+ petal trail)

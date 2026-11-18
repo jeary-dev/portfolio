@@ -3,12 +3,15 @@ import { isPlaceholder, showPlaceholders } from "@/lib/utils";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { RevealText } from "@/components/ui/RevealText";
 import { InkLink } from "@/components/ui/InkLink";
+import { contactEnv } from "@/lib/contact";
 import { ContactCompose } from "./contact/ContactCompose";
 import { CopyHandle } from "./contact/CopyHandle";
 
 export function Contact() {
   const discordUrl = isPlaceholder(site.discord.url) ? null : site.discord.url;
   const links = site.links.filter((l) => showPlaceholders || !isPlaceholder(l.href));
+  // Read per request (the root layout renders at request time), so env changes need only a restart.
+  const { mode, to } = contactEnv();
 
   return (
     <section id="contact" aria-labelledby="contact-title" className="relative z-[1] px-5 py-28 sm:px-8 md:px-16 md:py-40">
@@ -18,8 +21,17 @@ export function Contact() {
         <div className="grid gap-16 lg:grid-cols-[1fr_1.1fr] lg:gap-20">
           <div>
             <RevealText className="max-w-md text-[17px] leading-relaxed text-mist">
-              The quickest way to reach me is Discord. Send a message about a plugin, a bot, a site or an app and
-              I&apos;ll get back to you.
+              {mode === "discord" ? (
+                <>
+                  The quickest way to reach me is Discord. Send a message about a plugin, a bot, a site or an app and
+                  I&apos;ll get back to you.
+                </>
+              ) : (
+                <>
+                  Tell me about a plugin, a bot, a site or an app and I&apos;ll get back to you. You can also find me
+                  on Discord.
+                </>
+              )}
             </RevealText>
 
             <div className="mt-12 rounded-sm border border-line bg-sumi/60 p-7">
@@ -67,7 +79,12 @@ export function Contact() {
             </ul>
           </div>
 
-          <ContactCompose username={site.discord.username} discordUrl={discordUrl} />
+          <ContactCompose
+            mode={mode}
+            mailtoAddress={mode === "mailto" ? to : null}
+            username={site.discord.username}
+            discordUrl={discordUrl}
+          />
         </div>
       </div>
     </section>

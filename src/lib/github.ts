@@ -1,5 +1,6 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
+import { isPlaceholder, showPlaceholders } from "@/lib/utils";
 import { categories, projectConfig, type Category, type Screenshot } from "@/config/projects";
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
@@ -112,7 +113,7 @@ function buildProjects(repos: GitHubRepo[]): Project[] {
       };
     });
 
-  const extras = cfg.extras.map<Project & { order: number }>((e, i) => ({
+  const extras = cfg.extras.filter((e) => showPlaceholders || !isPlaceholder(e.description)).map<Project & { order: number }>((e, i) => ({
     id: `extra-${i}-${e.title}`,
     repo: null,
     title: e.title,
@@ -146,7 +147,20 @@ function buildProjects(repos: GitHubRepo[]): Project[] {
 
 /* ── Repositories ───────────────────────────────────────────────────────── */
 
-export async function getProjects(): Promise<ProjectsResult> {
+/*
+ * GitHub data is fetched at request time, never during `next build`, and
+ * cached on the server with `use cache`:
+ *   - success: the "github" profile (refreshed hourly in the background)
+ *   - failure: the "githubRetry" profile (tried again after five minutes)
+ * If a refresh fails, the last good result in this process keeps being served,
+ * so a rate limit or outage never empties the Projects section.
+ * Unauthenticated budget: ~1 repo-list call an hour plus at most one README
+ * call per listed repo an hour, far inside GitHub's 60/hour limit.
+ */
+
+type ReposResult = { status: FetchStatus; repos: GitHubRepo[] };
+
+async function fetchRepos(): Promise<ReposResult> {
   "use cache";
   cacheTag("github-projects");
 
@@ -156,16 +170,25 @@ export async function getProjects(): Promise<ProjectsResult> {
       { headers: headers() },
     );
     if (!res.ok) {
-      cacheLife("minutes");
-      return { status: isRateLimited(res) ? "rate-limited" : "error", projects: buildProjects([]) };
+      cacheLife("githubRetry");
+      return { status: isRateLimited(res) ? "rate-limited" : "error", repos: [] };
     }
     const repos = (await res.json()) as GitHubRepo[];
-    cacheLife("hours");
-    return { status: "ok", projects: buildProjects(Array.isArray(repos) ? repos : []) };
+    cacheLife("github");
+    return { status: "ok", repos: Array.isArray(repos) ? repos : [] };
   } catch {
-    cacheLife("minutes");
-    return { status: "error", projects: buildProjects([]) };
+    cacheLife("githubRetry");
+    return { status: "error", repos: [] };
   }
+}
+
+let lastGoodRepos: GitHubRepo[] | null = null;
+
+export async function getProjects(): Promise<ProjectsResult> {
+  const result = await fetchRepos();
+  if (result.status === "ok") lastGoodRepos = result.repos;
+  else if (lastGoodRepos) return { status: "ok", projects: buildProjects(lastGoodRepos) };
+  return { status: result.status, projects: buildProjects(result.repos) };
 }
 
 /* ── READMEs ─────────────────────────────────────────────────────────────── */
@@ -210,7 +233,7 @@ export async function getReadme(repo: string): Promise<ReadmeResult> {
   const { projects } = await getProjects();
   const match = projects.find((p) => p.repo?.toLowerCase() === repo.toLowerCase());
   if (!match?.repo) {
-    cacheLife("minutes");
+    cacheLife("githubRetry");
     return { status: "not-found" };
   }
 
@@ -221,23 +244,23 @@ export async function getReadme(repo: string): Promise<ReadmeResult> {
       headers: { ...headers(), Accept: "application/vnd.github.html+json" },
     });
     if (res.status === 404) {
-      cacheLife("hours");
+      cacheLife("github");
       return { status: "missing", url: repoUrl };
     }
     if (!res.ok) {
-      cacheLife("minutes");
+      cacheLife("githubRetry");
       return { status: isRateLimited(res) ? "rate-limited" : "error", url: repoUrl };
     }
     const html = await res.text();
     const path = /data-path="([^"]+)"/.exec(html)?.[1] ?? "README.md";
-    cacheLife("hours");
+    cacheLife("github");
     return {
       status: "ok",
       html: absolutizeReadme(html, user, match.repo, path),
       url: `${repoUrl}#readme`,
     };
   } catch {
-    cacheLife("minutes");
+    cacheLife("githubRetry");
     return { status: "error", url: repoUrl };
   }
 }
@@ -308,17 +331,26 @@ async function contributionsViaHTML(user: string): Promise<ContributionsResult |
   return { status: "ok", total, weeks };
 }
 
-export async function getContributions(): Promise<ContributionsResult> {
+async function fetchContributions(): Promise<ContributionsResult> {
   "use cache";
   cacheTag("github-contributions");
   const user = projectConfig.githubUser;
   try {
     const result = (await contributionsViaGraphQL(user)) ?? (await contributionsViaHTML(user));
     if (result) {
-      cacheLife("hours");
+      cacheLife("github");
       return result;
     }
   } catch {}
-  cacheLife("minutes");
+  cacheLife("githubRetry");
   return { status: "error", total: 0, weeks: [] };
+}
+
+let lastGoodContributions: ContributionsResult | null = null;
+
+export async function getContributions(): Promise<ContributionsResult> {
+  const result = await fetchContributions();
+  if (result.status === "ok") lastGoodContributions = result;
+  else if (lastGoodContributions) return lastGoodContributions;
+  return result;
 }

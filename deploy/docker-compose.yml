@@ -1,0 +1,33 @@
+# Run through the Makefile (make -C deploy <target>), which passes
+# --env-file portfolio.env so ${...} below resolve from it.
+name: portfolio
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://jeary.dev}
+        APP_VERSION: ${APP_VERSION:-dev}
+    image: portfolio-app:latest
+    env_file: portfolio.env
+    # Localhost only: the Cloudflare Tunnel is the sole way in.
+    ports:
+      - "127.0.0.1:3200:3000"
+    # Comes back after crashes and reboots (as long as the Docker service is enabled).
+    restart: unless-stopped
+    init: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

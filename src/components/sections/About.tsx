@@ -37,7 +37,7 @@ export function About() {
             Toolkit <span className="font-jp tracking-[0.4em] text-sakura/70">道具</span>
           </p>
           <ul className="grid gap-px overflow-hidden rounded-sm border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
-            {skills.map((group, i) => (
+            {skills.filter((group) => visibleItems(group.items).length > 0).map((group, i) => (
               <SkillGroup
                 key={group.discipline}
                 index={i}
