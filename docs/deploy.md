@@ -50,9 +50,6 @@ under Zero Trust → Networks → Tunnels instead.
 | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Defaults to `https://jeary.dev`. Built into the image, so changes need `deploy-local`. |
 | `GITHUB_TOKEN` | Optional. Fine-grained token with no permissions. Without it the site stays well inside GitHub's 60 requests an hour. |
-| `CONTACT_EMAIL` | Where contact messages go, and the `mailto:` fallback. |
-| `RESEND_API_KEY` | Optional. Sends the form from the server. Without it the form uses `mailto:`. |
-| `RESEND_FROM` | Sender on a domain verified in Resend, e.g. `jeary.dev <contact@jeary.dev>`. |
 
 The file is git-ignored. After changing it, run `make -C deploy deploy-local` so the container is
 recreated with the new values.
@@ -84,13 +81,11 @@ starts. Cloudflare shows its error page for any request that lands in that gap.
 - The container runs as a non-root user with all capabilities dropped and `no-new-privileges`.
 - Every page gets a nonce-based Content-Security-Policy (`src/proxy.ts`) plus HSTS,
   `X-Frame-Options`, `nosniff`, a referrer policy and a permissions policy (`next.config.ts`).
-- The contact form is rate-limited per visitor IP (Cloudflare's `CF-Connecting-IP`) and has a
-  honeypot field.
+- There's no form backend: the contact form only copies a message for a Discord DM, so it sends
+  nothing to the server.
 
 ## Troubleshooting
 
-- **Contact form says it couldn't send:** check `make -C deploy logs` for `[contact]` lines. The
-  most common cause is `RESEND_FROM` using a domain that isn't verified in Resend.
 - **Projects show a "GitHub couldn't be reached" notice:** GitHub was unreachable or rate-limited
   and the container had no earlier result yet (for example, just after a restart). It retries
   every five minutes. Setting `GITHUB_TOKEN` avoids rate limits entirely.

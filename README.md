@@ -97,11 +97,6 @@ For local development, copy `deploy/portfolio.env.example` to `.env.local`. All 
 | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Canonical URL for links, Open Graph, the sitemap and robots. Defaults to `https://jeary.dev`. Inlined at build time. |
 | `GITHUB_TOKEN` | A fine-grained token with **no scopes**. It raises the API limit from 60 to 5,000 requests per hour and enables the GraphQL contributions source. |
-| `CONTACT_EMAIL` | Where contact messages go. With only this set, the form opens the visitor's email app (`mailto:`). |
-| `RESEND_API_KEY` | With this and `CONTACT_EMAIL`, the form sends from the server via Resend, falling back to `mailto:` if sending fails. |
-| `RESEND_FROM` | Sender address on a domain verified in Resend, e.g. `jeary.dev <contact@jeary.dev>`. |
-
-With no contact variables set, the form composes a message to paste into a Discord DM.
 
 ## Deploy
 
@@ -117,9 +112,8 @@ src/
   app/                 layout (fonts, metadata), page, OG image, icons, sitemap, robots, 404
   config/              ← your content: site.ts, projects.ts
   app/api/             readme/[repo] (README for the Explore modal), health
-  app/actions/         contact.ts (contact form server action)
   proxy.ts             per-request CSP nonce
-  lib/                 github.ts (server data), contact.ts, hooks.ts, utils.ts, og.tsx
+  lib/                 github.ts (server data), hooks.ts, utils.ts, og.tsx
   components/
     providers/         Lenis smooth scroll (shares GSAP's ticker), Motion config
     chrome/            Loader, Header (+ mobile menu), Cursor (+ petal trail)

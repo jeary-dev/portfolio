@@ -47,8 +47,8 @@ export const site = {
   discord: {
     /** The username people should DM. */
     username: "czrbyn",
-    /** Profile link or server invite. Placeholder until you add one. */
-    url: "[your Discord profile URL or server invite]",
+    /** Profile link or server invite. */
+    url: "https://discord.gg/YBZVpWR8ma",
   },
 
   /**
@@ -56,8 +56,8 @@ export const site = {
    * production, so add the real URL when the profile exists.
    */
   links: [
-    { label: "Modrinth", href: "[your Modrinth profile URL]" },
-    { label: "SpigotMC", href: "[your SpigotMC profile URL]" },
+    { label: "Modrinth", href: "https://modrinth.com/user/jeary-dev" },
+    { label: "SpigotMC", href: "https://www.spigotmc.org/members/jeary-dev.2637984/" },
   ],
 } as const;
 
@@ -73,19 +73,19 @@ export const skills: { discipline: Category; label: string; kanji: string; items
     discipline: "discord",
     label: "Discord bots",
     kanji: "話",
-    items: ["[library, e.g. JDA / discord.js / discord.py]", "[language]"],
+    items: ["discord.js", "TypeScript", "JDA", "Kotlin", "Slash commands & components", "SQLite"],
   },
   {
     discipline: "web",
     label: "Websites",
     kanji: "網",
-    items: ["Next.js", "TypeScript", "Tailwind CSS", "[anything else]"],
+    items: ["Next.js", "TypeScript", "Tailwind CSS", "React", "Node.js", "Docker"],
   },
   {
     discipline: "apps",
     label: "Apps",
     kanji: "器",
-    items: ["[frameworks you use]", "[languages you use]"],
+    items: ["Kotlin", "Jetpack Compose", "React Native", "Electron"],
   },
 ];
 
