@@ -77,8 +77,8 @@ export const projectConfig: ProjectConfig = {
       pinned: true,
       order: 1,
       category: "minecraft",
-      // ▼ SCREENSHOT SLOT: Hanami (uncomment once public/projects/hanami.webp exists)
-      // screenshot: { src: "/projects/hanami.webp", alt: "Hanami particle cosmetics in game" },
+      // ▼ SCREENSHOT SLOT: Hanami
+      screenshot: { src: "/projects/hanami.webp", alt: "The Hanami logo: 花見 above the word HANAMI" },
     },
     {
       repo: "Kaizen",
