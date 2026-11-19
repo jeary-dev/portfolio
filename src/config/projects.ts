@@ -64,7 +64,7 @@ export const projectConfig: ProjectConfig = {
   inferCategories: true,
 
   /*
-   * Featured: Hanami, Ichiba, Kaizen (pinned, in that order).
+   * Featured: Hanami, Kaizen (pinned, in that order).
    *
    * SCREENSHOT SLOTS: drop a 16:9 image (1600×900 works well) into
    * public/projects/ and uncomment the matching `screenshot` line. Leave them
@@ -83,7 +83,7 @@ export const projectConfig: ProjectConfig = {
       repo: "Kaizen",
       title: "Kaizen",
       pinned: true,
-      order: 3,
+      order: 2,
       category: "minecraft",
       description:
         "Edit your Minecraft server's config files in a real web editor, then apply them with one command. End-to-end encrypted, with live checks, a diff before saving, and one-command undo.",
@@ -91,29 +91,16 @@ export const projectConfig: ProjectConfig = {
       // ▼ SCREENSHOT SLOT: Kaizen
       // screenshot: { src: "/projects/kaizen.png", alt: "The Kaizen web editor showing a server config" },
     },
-    // Retired: not featured.
-    { repo: "MCBridge", hidden: true },
+    // Not shown, even if these repos are public on GitHub.
+    { repo: "MCBridge", hidden: true }, // retired
+    { repo: "Ichiba", hidden: true },
   ],
 
   /*
    * Work that isn't a public GitHub repo. An entry whose description is still a
    * [placeholder] is hidden in production, like every other placeholder.
    */
-  extras: [
-    {
-      title: "Ichiba",
-      pinned: true,
-      order: 2,
-      // TODO: set the real category ("minecraft" | "discord" | "web" | "apps" | "other").
-      category: "other",
-      description: "[one or two sentences about Ichiba]",
-      // url: "https://github.com/jeary-dev/Ichiba",   // the code, once public
-      // homepage: "https://…",                         // a live link, if any
-      // language: "Kotlin",
-      // ▼ SCREENSHOT SLOT: Ichiba
-      // screenshot: { src: "/projects/ichiba.png", alt: "Ichiba" },
-    },
-  ],
+  extras: [],
 };
 
 export const categories: { id: Category; label: string; kanji: string }[] = [
