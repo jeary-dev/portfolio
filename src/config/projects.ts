@@ -66,9 +66,10 @@ export const projectConfig: ProjectConfig = {
   /*
    * Featured: Hanami, Kaizen (pinned, in that order).
    *
-   * SCREENSHOT SLOTS: drop a 16:9 image (1600×900 works well) into
-   * public/projects/ and uncomment the matching `screenshot` line. Leave them
-   * commented until the file exists, or the card shows a broken image.
+   * SCREENSHOT SLOTS: drop an image (WebP, 1600×900 or 1600×1000, under
+   * ~300 KB) into public/projects/ and uncomment the matching `screenshot`
+   * line. Cards crop to 16:9 from the centre. Leave a slot commented until the
+   * file exists, or the card shows a broken image.
    */
   overrides: [
     {
@@ -76,8 +77,8 @@ export const projectConfig: ProjectConfig = {
       pinned: true,
       order: 1,
       category: "minecraft",
-      // ▼ SCREENSHOT SLOT: Hanami
-      // screenshot: { src: "/projects/hanami.png", alt: "Hanami particle cosmetics in game" },
+      // ▼ SCREENSHOT SLOT: Hanami (uncomment once public/projects/hanami.webp exists)
+      // screenshot: { src: "/projects/hanami.webp", alt: "Hanami particle cosmetics in game" },
     },
     {
       repo: "Kaizen",
@@ -89,7 +90,15 @@ export const projectConfig: ProjectConfig = {
         "Edit your Minecraft server's config files in a real web editor, then apply them with one command. End-to-end encrypted, with live checks, a diff before saving, and one-command undo.",
       homepage: "https://edit.jeary.dev/demo",
       // ▼ SCREENSHOT SLOT: Kaizen
-      // screenshot: { src: "/projects/kaizen.png", alt: "The Kaizen web editor showing a server config" },
+      screenshot: { src: "/projects/kaizen.webp", alt: "The Kaizen web editor with a plugin config open and one unsaved change" },
+    },
+    {
+      repo: "portfolio",
+      category: "web",
+      description:
+        "The site you're on. Next.js with project data pulled live from GitHub, self-hosted in Docker behind a Cloudflare Tunnel.",
+      // ▼ SCREENSHOT SLOT: portfolio
+      screenshot: { src: "/projects/portfolio.webp", alt: "The hero section of this site" },
     },
     // Not shown, even if these repos are public on GitHub.
     { repo: "MCBridge", hidden: true }, // retired
